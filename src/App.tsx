@@ -11,7 +11,10 @@ import Slider from "./components/Slider";
 import SatelliteManager from "./components/SatelliteManager";
 
 //TODO: change this to the actual backend server URL
-const backendServerURL = "http://localhost:4000";
+const isDev = import.meta.env.MODE === "development";
+const backendServerURL = isDev
+    ? "http://localhost:4000"
+    : "https://your-production-url.com";
 
 function App() {
     const [time, setTime] = useState(0);
@@ -110,7 +113,9 @@ function App() {
                         height: "100%",
                     }}
                 >
-                    <span className="navbar-brand mb-0 h1">Windborne</span>
+                    <span className="navbar-brand mb-0 h1">
+                        Windborne Satellite Viewer
+                    </span>
                 </div>
             </header>
             <Canvas style={{ width: "100vw", height: "80vh" }}>
