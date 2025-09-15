@@ -8,6 +8,7 @@ import Earth from "./components/Earth";
 import SetBackground from "./components/SetBackground";
 import Slider from "./components/Slider";
 import SatelliteManager from "./components/SatelliteManager";
+import { lerp } from "three/src/math/MathUtils.js";
 
 const backendServerURL = "https://windborne-nu.vercel.app/api";
 
@@ -25,7 +26,9 @@ function App() {
     // Fetch and cache satellite data for a given hour
     const getSatelliteData = async (n: number) => {
         if (n < 0 || n > 23) return;
-        if (satellites[n] && satellites[n].length > 0) return satellites[n];
+        if (satellites[n] && satellites[n].length > 0) return satellites[n]; // Return cached data if available
+
+        //TODO: will make a lot of requests before the data is cached, need to debounce or something
         const res = await fetch(
             `${backendServerURL}/treasure?id=${n.toString().padStart(2, "0")}`
         );
@@ -69,13 +72,16 @@ function App() {
         if (!data0) return data1;
         if (!data1) return data0;
 
+        const delta = n - t0;
+
         // Simple linear interpolation based on altitude
         const interpolated = data0.map((sat, i) => {
             if (i >= data1.length) return sat;
-            const alt0 = sat[2];
-            const alt1 = data1[i][2];
-            const alt = alt0 + (alt1 - alt0) * (n - t0);
-            return [sat[0], sat[1], alt];
+
+            const lat = lerp(sat[0], data1[i][0], delta);
+            const lon = lerp(sat[1], data1[i][1], delta);
+            const alt = lerp(sat[2], data1[i][2], delta);
+            return [lat, lon, alt];
         });
         return interpolated;
     };
@@ -121,7 +127,7 @@ function App() {
                 <OrbitControls />
                 <SetBackground />
             </Canvas>
-            <Slider value={time} setValue={setTime} step={0.1}>
+            <Slider value={time} setValue={setTime} step={0.05}>
                 Time:
             </Slider>
         </>
