@@ -1,9 +1,8 @@
-import { useState, type SetStateAction, type Dispatch, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import { Canvas } from "react-three-fiber";
-import * as THREE from "three";
 import { OrbitControls } from "@react-three/drei";
-import Box from "./components/Box";
+//import Box from "./components/Box";
 import Earth from "./components/Earth";
 
 import SetBackground from "./components/SetBackground";
@@ -14,7 +13,7 @@ import SatelliteManager from "./components/SatelliteManager";
 const isDev = import.meta.env.MODE === "development";
 const backendServerURL = isDev
     ? "http://localhost:4000"
-    : "https://https://windborne-mi8244c3j-franks-projects-b41306c6.vercel.app/api";
+    : "https://windborne-nu.vercel.app/api";
 
 function App() {
     const [time, setTime] = useState(0);

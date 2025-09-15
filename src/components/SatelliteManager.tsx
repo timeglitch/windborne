@@ -8,6 +8,7 @@ interface Props {
 }
 
 const colorsArray = [
+    //TODO: colors broke somehow
     "#ff0000", // red
     "#ffa500", // orange
     "#ffff00", // yellow
