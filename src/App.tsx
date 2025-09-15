@@ -127,7 +127,7 @@ function App() {
                 <OrbitControls />
                 <SetBackground />
             </Canvas>
-            <Slider value={time} setValue={setTime} step={0.05}>
+            <Slider value={time} setValue={setTime} step={0.05} max={23}>
                 Time:
             </Slider>
         </>
