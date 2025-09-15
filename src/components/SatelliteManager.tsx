@@ -8,7 +8,20 @@ interface Props {
     satellites: number[][];
 }
 
-const satColor = new THREE.Color("blue");
+const colorsArray = [
+    "#ff0000", // red
+    "#ffa500", // orange
+    "#ffff00", // yellow
+    "#008000", // green
+    "#0000ff", // blue
+    "#4b0082", // indigo
+    "#ee82ee", // violet
+    "#00ffff", // cyan
+    "#ff00ff", // magenta
+    "#ffffff", // white
+    "#808080", // gray
+    // Add more colors as needed
+];
 
 const altitudeScale = 0.03; // Scale down altitude for visualization
 function latLongAltToVector3(
@@ -34,21 +47,20 @@ const SatelliteManager: React.FC<Props> = ({ satellites }: Props) => {
     return (
         <Instances>
             <sphereGeometry args={[0.01, 16, 16]} />
-            <meshStandardMaterial
-                color={satColor}
-                emissive={satColor}
-                emissiveIntensity={1}
-            />
+            {/* Default material, overridden per instance */}
+            <meshStandardMaterial color={"white"} emissive={"white"} />
             {satellites.map((sat, i) => {
                 if (sat.length !== 3) {
                     console.warn(`Invalid satellite data at index ${i}:`, sat);
                     return null;
                 }
                 const [lat, lon, alt] = sat;
+                const color = colorsArray[i % colorsArray.length];
                 return (
                     <Instance
                         key={i}
                         position={latLongAltToVector3(lat, lon, alt, 1)}
+                        color={color}
                     />
                 );
             })}
