@@ -1,8 +1,7 @@
 import * as THREE from "three";
-import React, { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import React from "react";
 import { Instances, Instance } from "@react-three/drei";
-import Satellite from "./Satellite";
+//import Satellite from "./Satellite"; //TODO: actually use this?
 
 interface Props {
     satellites: number[][];

@@ -8,7 +8,7 @@ interface Props {
 const Box: React.FC<Props> = ({ size = 3 }: Props) => {
     const meshRef = useRef<THREE.Mesh>(null);
 
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
         if (meshRef.current) {
             meshRef.current.rotation.x += 1 * delta;
             meshRef.current.rotation.y += 1 * delta;

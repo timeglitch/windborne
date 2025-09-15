@@ -14,7 +14,7 @@ import SatelliteManager from "./components/SatelliteManager";
 const isDev = import.meta.env.MODE === "development";
 const backendServerURL = isDev
     ? "http://localhost:4000"
-    : "https://your-production-url.com";
+    : "https://https://windborne-mi8244c3j-franks-projects-b41306c6.vercel.app/api";
 
 function App() {
     const [time, setTime] = useState(0);

@@ -8,7 +8,7 @@ interface Props {
 const Satellite: React.FC<Props> = ({ size = 1 }: Props) => {
     const meshRef = useRef<THREE.Mesh>(null);
 
-    useFrame((state, delta) => {
+    useFrame((_, delta) => {
         if (meshRef.current) {
             meshRef.current.rotation.y += 100 * delta;
         }

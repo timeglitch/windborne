@@ -1,7 +1,5 @@
 import * as THREE from "three";
 import React, { useEffect, useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import earthTexture from "/earth_texture.jpg";
 
 interface Props {
     size?: number;
