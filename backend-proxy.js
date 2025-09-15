@@ -1,3 +1,5 @@
+//NOTE: this was only used for testing, just use the vercel server now
+
 //start with node backend-proxy.js
 
 import express from 'express';

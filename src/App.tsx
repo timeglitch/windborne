@@ -9,11 +9,7 @@ import SetBackground from "./components/SetBackground";
 import Slider from "./components/Slider";
 import SatelliteManager from "./components/SatelliteManager";
 
-//TODO: change this to the actual backend server URL
-const isDev = import.meta.env.MODE === "development";
-const backendServerURL = isDev
-    ? "http://localhost:4000"
-    : "https://windborne-nu.vercel.app/api";
+const backendServerURL = "https://windborne-nu.vercel.app/api";
 
 function App() {
     const [time, setTime] = useState(0);
@@ -31,7 +27,7 @@ function App() {
         if (n < 0 || n > 23) return;
         if (satellites[n] && satellites[n].length > 0) return satellites[n];
         const res = await fetch(
-            `${backendServerURL}/treasure/${n.toString().padStart(2, "0")}.json`
+            `${backendServerURL}/treasure?id=${n.toString().padStart(2, "0")}`
         );
         const data = await res.json();
         setSatellites((prev) => {
