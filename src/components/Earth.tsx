@@ -9,7 +9,7 @@ interface Props {
 }
 const earth_texture = new THREE.TextureLoader().load("/earth_texture.jpg");
 
-const Earth: React.FC<Props> = ({ size = 1, hour = 0 }: Props) => {
+const Earth: React.FC<Props> = ({ size = 1 }: Props) => {
     const meshRef = useRef<THREE.Mesh>(null);
 
     const rotationVal = 0; //This orients the texture correctly

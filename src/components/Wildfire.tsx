@@ -115,7 +115,7 @@ const Wildfire: React.FC<Props> = ({
             <mesh
                 ref={meshRefInner}
                 onPointerOver={() => {
-                    setSelected((s) => true);
+                    setSelected(() => true);
                     if (setHoveringText) {
                         const hoverText =
                             (title || "Wildfire") +
@@ -128,7 +128,7 @@ const Wildfire: React.FC<Props> = ({
                     }
                 }}
                 onPointerOut={() => {
-                    setSelected((s) => false);
+                    setSelected(() => false);
                 }}
             >
                 <sphereGeometry args={[size * 0.6, 16, 16]} />
