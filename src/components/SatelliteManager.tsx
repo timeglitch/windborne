@@ -1,6 +1,6 @@
-import * as THREE from "three";
 import React from "react";
 import { Instances, Instance } from "@react-three/drei";
+import { latLongAltToVector3 } from "../App";
 
 //import Satellite from "./Satellite"; //TODO: actually use this?
 
@@ -23,23 +23,6 @@ const colorsArray = [
     "#808080", // gray
     // Add more colors as needed
 ];
-
-const altitudeScale = 0.03; // Scale down altitude for visualization
-function latLongAltToVector3(
-    lat: number,
-    lon: number,
-    alt: number,
-    radius: number
-): THREE.Vector3 {
-    const phi = THREE.MathUtils.degToRad(90 - lat);
-    const theta = THREE.MathUtils.degToRad(lon);
-
-    const x = -(radius + alt * altitudeScale) * Math.sin(phi) * Math.cos(theta);
-    const y = (radius + alt * altitudeScale) * Math.cos(phi) * Math.cos(theta);
-    const z = (radius + alt * altitudeScale) * Math.sin(theta);
-
-    return new THREE.Vector3(x, y, z);
-}
 
 const SatelliteManager: React.FC<Props> = ({ satellites }: Props) => {
     if (!satellites || satellites.length === 0) {
