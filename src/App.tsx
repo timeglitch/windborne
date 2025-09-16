@@ -20,27 +20,12 @@ function App() {
     const autoScrollTimeout = useRef<NodeJS.Timeout | null>(null);
     const autoScrollInterval = useRef<NodeJS.Timeout | null>(null);
 
-    const [autoScrollActive, setAutoScrollActive] = useState(false);
+    const [autoScrollActive, setAutoScrollActive] = useState(true);
 
     // Handler to set time and reset auto-scroll inactivity timer
     const handleSliderChange = (val: number) => {
         setTime(val);
-        // Reset inactivity timer
-        if (!autoScrollActive) return;
-        if (autoScrollTimeout.current) clearTimeout(autoScrollTimeout.current);
-        if (autoScrollInterval.current) {
-            clearInterval(autoScrollInterval.current);
-            autoScrollInterval.current = null;
-        }
-        autoScrollTimeout.current = setTimeout(() => {
-            autoScrollInterval.current = setInterval(() => {
-                setTime((prev) => {
-                    // Wrap around if at max (23)
-                    if (prev >= 23) return 0;
-                    return prev + 0.125;
-                });
-            }, 250);
-        }, 1000);
+        setAutoScrollActive(false); // Turn off auto-scroll on any slider change
     };
 
     // Effect to handle auto-scroll enable/disable
@@ -59,7 +44,7 @@ function App() {
                     return prev + 0.125;
                 });
             }, 250);
-        }, 1000);
+        }, 100); // Start auto-scroll after 0.1s of inactivity
         return () => {
             if (autoScrollTimeout.current)
                 clearTimeout(autoScrollTimeout.current);
@@ -201,7 +186,7 @@ function App() {
     }, [wildfires]);*/
 
     // Fetch and cache satellite data for a given hour
-    const getSatelliteData = async (n: number) => {
+    const getSatelliteData = (n: number) => {
         if (n < 0 || n > 23) return;
         return satellites[n]; // Return cached data if available
 
@@ -243,8 +228,8 @@ function App() {
         if (t0 === t1) {
             return getSatelliteData(t0);
         }
-        const data0 = await getSatelliteData(t0);
-        const data1 = await getSatelliteData(t1);
+        const data0 = getSatelliteData(t0);
+        const data1 = getSatelliteData(t1);
         if (!data0 && !data1) {
             return [];
         }
@@ -282,6 +267,7 @@ function App() {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
+                    padding: "0.25rem 0.5rem", // Reduced padding
                 }}
             >
                 <div
@@ -290,6 +276,7 @@ function App() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
+                        padding: 0, // Remove extra padding from container
                     }}
                 >
                     <span className="navbar-brand mb-0 h1">
@@ -297,7 +284,8 @@ function App() {
                     </span>
                 </div>
                 <span>
-                    Made by Frank Zhang.{" "}
+                    Made by Frank Zhang. Drag slider to view satellite positions
+                    at different times. Hover over fire to see details.{" "}
                     <a
                         href="https://github.com/timeglitch/windborne"
                         target="_blank"

@@ -16,6 +16,7 @@ TODO:
 
 -   Make fires instances or anything more efficient than just 1000 meshes
 -   Make the UI a little better
+-   Refactor a little for readability, App.tsx is getting a little crowded.
 -   Make the lighting look good (adding sun and shade? could get good textures from NASAA)
 -   Make the satellites look like balloons.
 
