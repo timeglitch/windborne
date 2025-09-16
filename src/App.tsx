@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./App.css";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
@@ -17,6 +17,56 @@ const EARTH_RADIUS = 1;
 
 function App() {
     const [time, setTime] = useState(0);
+    const autoScrollTimeout = useRef<NodeJS.Timeout | null>(null);
+    const autoScrollInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const [autoScrollActive, setAutoScrollActive] = useState(false);
+
+    // Handler to set time and reset auto-scroll inactivity timer
+    const handleSliderChange = (val: number) => {
+        setTime(val);
+        // Reset inactivity timer
+        if (!autoScrollActive) return;
+        if (autoScrollTimeout.current) clearTimeout(autoScrollTimeout.current);
+        if (autoScrollInterval.current) {
+            clearInterval(autoScrollInterval.current);
+            autoScrollInterval.current = null;
+        }
+        autoScrollTimeout.current = setTimeout(() => {
+            autoScrollInterval.current = setInterval(() => {
+                setTime((prev) => {
+                    // Wrap around if at max (23)
+                    if (prev >= 23) return 0;
+                    return prev + 0.125;
+                });
+            }, 250);
+        }, 1000);
+    };
+
+    // Effect to handle auto-scroll enable/disable
+    useEffect(() => {
+        if (!autoScrollActive) {
+            if (autoScrollTimeout.current)
+                clearTimeout(autoScrollTimeout.current);
+            if (autoScrollInterval.current)
+                clearInterval(autoScrollInterval.current);
+            return;
+        }
+        autoScrollTimeout.current = setTimeout(() => {
+            autoScrollInterval.current = setInterval(() => {
+                setTime((prev) => {
+                    if (prev >= 23) return 0;
+                    return prev + 0.125;
+                });
+            }, 250);
+        }, 1000);
+        return () => {
+            if (autoScrollTimeout.current)
+                clearTimeout(autoScrollTimeout.current);
+            if (autoScrollInterval.current)
+                clearInterval(autoScrollInterval.current);
+        };
+    }, [autoScrollActive]);
 
     const [showNullIsland, setShowNullIsland] = useState(false);
 
@@ -26,6 +76,10 @@ function App() {
 
     const [satellites, setSatellites] = useState<Array<Array<Array<number>>>>(
         [...Array(24)].map(() => [])
+    );
+
+    const [hoveringWildfire, setHoveringWildfire] = useState<string>(
+        "Loading wildfire data..."
     );
 
     //Fill the satellites array by getting data for each hour
@@ -50,12 +104,13 @@ function App() {
                         updated[i] = data;
                         return updated;
                     });
-                    console.log("data fetched for hour " + i);
+                    //console.log("data fetched for hour " + i);
                 })
                 .catch((err) => {
                     console.error("Error fetching data for hour " + i, err);
                 });
         }
+        console.log("All satellite data fetches initiated");
     }, []);
 
     const [wildfires, setWildfires] = useState<Array<any>>([]);
@@ -110,7 +165,9 @@ function App() {
             const geomToSize = (geom: any) => {
                 const unit = geom.magnitudeUnit;
                 const value = geom.magnitudeValue;
-                if (unit === "acres") {
+                if (!unit || !value) return scalingFactor * 10;
+                // Default size if no magnitude info
+                else if (unit === "acres") {
                     return Math.log(value) * scalingFactor;
                 } else {
                     console.warn("Unknown magnitude unit:", unit);
@@ -132,13 +189,16 @@ function App() {
                 }));
             });
             setWildfires(processed);
+            setHoveringWildfire(
+                `Loaded ${processed.length} wildfires from the past year, hover over a wildfire to see details`
+            );
         };
         fetchWildfires();
     }, []);
 
-    useEffect(() => {
+    /*useEffect(() => {
         console.log("Wildfires updated:", wildfires);
-    }, [wildfires]);
+    }, [wildfires]);*/
 
     // Fetch and cache satellite data for a given hour
     const getSatelliteData = async (n: number) => {
@@ -212,7 +272,7 @@ function App() {
                 setInterpolatedSatellites(result);
             }
         });
-    }, [time]);
+    }, [time]); //TODO: using the wildfire state as a dependency is a hack to get around the fact that the satellites don't render on startup sometimes -- need to figure out why
 
     return (
         <>
@@ -230,13 +290,22 @@ function App() {
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        height: "100%",
                     }}
                 >
                     <span className="navbar-brand mb-0 h1">
                         Windborne Satellite Viewer
                     </span>
                 </div>
+                <span>
+                    Made by Frank Zhang.{" "}
+                    <a
+                        href="https://github.com/timeglitch/windborne"
+                        target="_blank"
+                    >
+                        {" "}
+                        Code & Info{" "}
+                    </a>
+                </span>
             </header>
             <Canvas style={{ width: "100vw", height: "80vh" }}>
                 <Earth size={EARTH_RADIUS} hour={time} />
@@ -257,38 +326,66 @@ function App() {
                         longitude={fire.longitude}
                         altitude={fire.altitude}
                         title={fire.title}
+                        setHoveringText={setHoveringWildfire}
                     />
                 ))}
                 <OrbitControls />
                 <SetBackground />
             </Canvas>
-            <Slider value={time} setValue={setTime} step={0.05} max={23}>
-                Time:
+            <Slider
+                value={time}
+                setValue={handleSliderChange}
+                step={0.05}
+                max={23}
+            >
+                Hours before now:
             </Slider>
             <div
                 style={{
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "space-between",
                     marginTop: "1rem",
+                    width: "100%",
                 }}
             >
-                <input
-                    type="checkbox"
-                    id="showNullIsland"
-                    checked={showNullIsland}
-                    onChange={(e) => setShowNullIsland(e.target.checked)}
-                    style={{ marginRight: "0.5rem" }}
-                />
-                <label htmlFor="showNullIsland">
-                    Show{" "}
-                    <a
-                        href="https://en.wikipedia.org/wiki/Null_Island"
-                        target="_blank"
-                    >
-                        Null Island
-                    </a>{" "}
-                    (for orienting coordinates)
-                </label>
+                <div>{hoveringWildfire}</div>
+
+                <div style={{ display: "flex", alignItems: "center" }}>
+                    <input
+                        type="checkbox"
+                        id="setAutoScrollActive"
+                        checked={autoScrollActive}
+                        onChange={(e) => setAutoScrollActive(e.target.checked)}
+                        style={{ marginRight: "0.5rem" }}
+                    />
+
+                    <label htmlFor="setAutoScrollActive">
+                        Auto-scroll time slider
+                    </label>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center" }}>
+                    <input
+                        type="checkbox"
+                        id="showNullIsland"
+                        checked={showNullIsland}
+                        onChange={(e) => setShowNullIsland(e.target.checked)}
+                        style={{ marginRight: "0.5rem" }}
+                    />
+
+                    <label htmlFor="showNullIsland">
+                        Show{" "}
+                        <a
+                            href="https://en.wikipedia.org/wiki/Null_Island"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Null Island
+                        </a>{" "}
+                        (for debugging coordinates)
+                    </label>
+                </div>
             </div>
         </>
     );

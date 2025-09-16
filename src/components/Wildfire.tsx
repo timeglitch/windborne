@@ -11,6 +11,7 @@ interface Props {
     longitude: number;
     altitude: number;
     title?: string;
+    setHoveringText?: (text: string) => void;
 }
 const SMOKE_PARTICLE_COUNT = 16;
 const Wildfire: React.FC<Props> = ({
@@ -19,6 +20,7 @@ const Wildfire: React.FC<Props> = ({
     longitude,
     altitude,
     title,
+    setHoveringText,
 }: Props) => {
     // Selection state
     const [selected, setSelected] = useState(false);
@@ -114,11 +116,19 @@ const Wildfire: React.FC<Props> = ({
                 ref={meshRefInner}
                 onPointerOver={() => {
                     setSelected((s) => true);
-                    console.log(title || "Wildfire");
+                    if (setHoveringText) {
+                        const hoverText =
+                            (title || "Wildfire") +
+                            " at " +
+                            latitude.toFixed(2) +
+                            "°, " +
+                            longitude.toFixed(2) +
+                            "°";
+                        setHoveringText(hoverText);
+                    }
                 }}
                 onPointerOut={() => {
                     setSelected((s) => false);
-                    console.log("Pointer out");
                 }}
             >
                 <sphereGeometry args={[size * 0.6, 16, 16]} />
