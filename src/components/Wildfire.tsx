@@ -3,6 +3,8 @@ import React, { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { latLongAltToVector3, EARTH_RADIUS } from "../App";
 
+const enableSmoke = false;
+
 interface Props {
     size?: number;
     latitude: number;
@@ -143,24 +145,26 @@ const Wildfire: React.FC<Props> = ({
                 />
             </mesh>
             {/* Smoke particles */}
-            <group ref={smokeGroupRef}>
-                {smokeParticles.map((_, i) => (
-                    <mesh key={i}>
-                        <sphereGeometry
-                            args={[size * 0.1, 4, 4]}
-                            rotateY={Math.random() * Math.PI * 2}
-                        />
-                        <meshStandardMaterial
-                            color="#888"
-                            transparent={true}
-                            opacity={0.25}
-                            roughness={1}
-                            metalness={0}
-                            depthWrite={false}
-                        />
-                    </mesh>
-                ))}
-            </group>
+            {enableSmoke && (
+                <group ref={smokeGroupRef}>
+                    {smokeParticles.map((_, i) => (
+                        <mesh key={i}>
+                            <sphereGeometry
+                                args={[size * 0.1, 4, 4]}
+                                rotateY={Math.random() * Math.PI * 2}
+                            />
+                            <meshStandardMaterial
+                                color="#888"
+                                transparent={true}
+                                opacity={0.25}
+                                roughness={1}
+                                metalness={0}
+                                depthWrite={false}
+                            />
+                        </mesh>
+                    ))}
+                </group>
+            )}
         </group>
     );
 };

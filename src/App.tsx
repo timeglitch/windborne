@@ -96,7 +96,8 @@ function App() {
      */
 
     const wildfireAPIURL =
-        "https://eonet.gsfc.nasa.gov/api/v3/events?category=wildfires&magID=ac&magMin=5000&limit=5"; // Fetch ongoing wildfires with at least 5000 acres
+        "https://eonet.gsfc.nasa.gov/api/v3/events?category=wildfires&limit=10000&days=365"; // Fetch ongoing wildfires with at least 5000 acres
+
     useEffect(() => {
         // Fetch wildfire data once on mount
         const fetchWildfires = async () => {
@@ -105,17 +106,17 @@ function App() {
             console.log("Wildfire data fetched:", data);
 
             // Process the wildfire data into a flat array of useful objects
-            const scalingFactor = 0.00001; // Adjust this value to scale the size of the wildfires
+            const scalingFactor = 0.01; // Adjust this value to scale the size of the wildfires
             const geomToSize = (geom: any) => {
                 const unit = geom.magnitudeUnit;
                 const value = geom.magnitudeValue;
                 if (unit === "acres") {
-                    return value * scalingFactor;
+                    return Math.log(value) * scalingFactor;
                 } else {
                     console.warn("Unknown magnitude unit:", unit);
                     console.warn("for geom:", geom);
                 }
-                return 0;
+                return scalingFactor * 10;
             };
             // EONET v3 returns { events: [...] }
             const events = data.events || [];
@@ -251,7 +252,7 @@ function App() {
                 {wildfires.map((fire, index) => (
                     <Wildfire
                         key={index}
-                        size={0.3}
+                        size={fire.size || 0.1}
                         latitude={fire.latitude}
                         longitude={fire.longitude}
                         altitude={fire.altitude}
