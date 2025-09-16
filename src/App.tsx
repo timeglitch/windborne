@@ -25,6 +25,36 @@ function App() {
         [...Array(24)].map(() => [])
     );
 
+    //Fill the satellites array by getting data for each hour
+    useEffect(() => {
+        for (let i = 0; i < 24; i++) {
+            //First set the entry to an empty array to avoid multiple fetches
+            setSatellites((prev) => {
+                const updated = [...prev];
+                updated[i] = [];
+                return updated;
+            });
+            //Fetch data for hour i
+            fetch(
+                `${backendServerURL}/treasure?id=${i
+                    .toString()
+                    .padStart(2, "0")}`
+            )
+                .then((res) => res.json())
+                .then((data) => {
+                    setSatellites((prev) => {
+                        const updated = [...prev];
+                        updated[i] = data;
+                        return updated;
+                    });
+                    console.log("data fetched for hour " + i);
+                })
+                .catch((err) => {
+                    console.error("Error fetching data for hour " + i, err);
+                });
+        }
+    }, []);
+
     const [wildfires, setWildfires] = useState<Array<Array<number>>>([]);
 
     const wildfireAPIURL ="https://eonet.gsfc.nasa.gov/api/v3/categories/wildfires?days=14";
@@ -42,8 +72,9 @@ function App() {
     // Fetch and cache satellite data for a given hour
     const getSatelliteData = async (n: number) => {
         if (n < 0 || n > 23) return;
-        if (satellites[n] && satellites[n].length > 0) return satellites[n]; // Return cached data if available
+        return satellites[n]; // Return cached data if available
 
+        /**
         //TODO: will make a lot of requests before the data is cached, need to debounce or something
         const res = await fetch(
             `${backendServerURL}/treasure?id=${n.toString().padStart(2, "0")}`
@@ -71,7 +102,7 @@ function App() {
             //return empty array of the right shape
             return [];
         }
-        return data;
+        return data;*/
     };
 
     const interpolateSatelliteData = async (n: number) => {
@@ -145,7 +176,7 @@ function App() {
                 <OrbitControls />
                 <SetBackground />
             </Canvas>
-            <Slider value={time} setValue={setTime} step={0.05}>
+            <Slider value={time} setValue={setTime} step={0.05} max={23}>
                 Time:
             </Slider>
             <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
