@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import React from "react";
 import { Instances, Instance } from "@react-three/drei";
+
 //import Satellite from "./Satellite"; //TODO: actually use this?
 
 interface Props {
@@ -69,3 +70,4 @@ const SatelliteManager: React.FC<Props> = ({ satellites }: Props) => {
 };
 
 export default SatelliteManager;
+export { latLongAltToVector3 };

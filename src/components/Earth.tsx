@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import React, { useRef } from "react";
-import { useFrame } from "react-three-fiber";
 
 //TODO: orient it correctly
 
@@ -13,14 +12,10 @@ const earth_texture = new THREE.TextureLoader().load("/earth_texture.jpg");
 const Earth: React.FC<Props> = ({ size = 1, hour = 0 }: Props) => {
     const meshRef = useRef<THREE.Mesh>(null);
 
-    useFrame(() => {
-        if (meshRef.current) {
-            meshRef.current.rotation.y = (hour % 24) * (Math.PI / 12); // Rotate based on hour
-        }
-    });
+    const rotationVal = Math.PI; //This orients the texture correctly
 
     return (
-        <mesh ref={meshRef} scale={size}>
+        <mesh ref={meshRef} scale={size} rotation={[0, rotationVal, 0]}>
             <sphereGeometry args={[size, 32, 32]} />
             <meshStandardMaterial map={earth_texture} />
         </mesh>

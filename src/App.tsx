@@ -1,19 +1,21 @@
 import { useState, useEffect } from "react";
 import "./App.css";
-import { Canvas } from "react-three-fiber";
+import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-//import Box from "./components/Box";
+import Box from "./components/Box";
 import Earth from "./components/Earth";
 
 import SetBackground from "./components/SetBackground";
 import Slider from "./components/Slider";
-import SatelliteManager from "./components/SatelliteManager";
+import SatelliteManager, {latLongAltToVector3} from "./components/SatelliteManager";
 import { lerp } from "three/src/math/MathUtils.js";
 
 const backendServerURL = "https://windborne-nu.vercel.app/api";
 
 function App() {
     const [time, setTime] = useState(0);
+
+    const [showNullIsland, setShowNullIsland] = useState(false);
 
     const [interpolatedSatellites, setInterpolatedSatellites] = useState<
         Array<Array<number>>
@@ -22,6 +24,20 @@ function App() {
     const [satellites, setSatellites] = useState<Array<Array<Array<number>>>>(
         [...Array(24)].map(() => [])
     );
+
+    const [wildfires, setWildfires] = useState<Array<Array<number>>>([]);
+
+    const wildfireAPIURL ="https://eonet.gsfc.nasa.gov/api/v3/categories/wildfires?days=14";
+    useEffect(() => {
+        // Fetch wildfire data once on mount
+        const fetchWildfires = async () => {
+            const res = await fetch(wildfireAPIURL);
+            const data = await res.json();
+            console.log("Wildfire data fetched:", data);
+            setWildfires(data);
+        };
+        fetchWildfires();
+    }, []);
 
     // Fetch and cache satellite data for a given hour
     const getSatelliteData = async (n: number) => {
@@ -49,7 +65,8 @@ function App() {
             )
         ) {
             console.error(
-                "Satellite data for hour " + n + " is not of type number[][]"
+                "Satellite data for hour " + n + " is not of type number[][]",
+                data
             );
             //return empty array of the right shape
             return [];
@@ -124,12 +141,23 @@ function App() {
                 <ambientLight />
                 <pointLight position={[10, 10, 10]} />
                 <SatelliteManager satellites={interpolatedSatellites} />
+                {showNullIsland && <Box size={0.3} position={latLongAltToVector3(0, 0, 0, 1)} />}
                 <OrbitControls />
                 <SetBackground />
             </Canvas>
             <Slider value={time} setValue={setTime} step={0.05}>
                 Time:
             </Slider>
+            <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
+                <input
+                    type="checkbox"
+                    id="showNullIsland"
+                    checked={showNullIsland}
+                    onChange={(e) => setShowNullIsland(e.target.checked)}
+                    style={{ marginRight: "0.5rem" }}
+                />
+                <label htmlFor="showNullIsland">Show <a href="https://en.wikipedia.org/wiki/Null_Island" target="_blank">Null Island</a> (for orienting coordinates)</label>
+            </div>
         </>
     );
 }
